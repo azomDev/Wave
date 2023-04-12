@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:wave_frontend/components/message_input.dart';
 import 'package:wave_frontend/components/send_button.dart';
 import 'package:wave_frontend/services/messaging_service.dart';
+import 'package:wave_frontend/components/message_list.dart';
+import 'package:wave_frontend/models/message.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -30,8 +32,23 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            Expanded(
+              // Use a FutureBuilder to handle the async nature of fetching messages
+              child: FutureBuilder(
+                future: _messagingService.getMessages(),
+                builder: (BuildContext context, AsyncSnapshot<List<Message>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error fetching messages'));
+                  } else {
+                    return MessageList(messages: snapshot.data!);
+                  }
+                },
+              ),
+            ),
+            SizedBox(height: 10),
             Row(
               children: [
                 Expanded(

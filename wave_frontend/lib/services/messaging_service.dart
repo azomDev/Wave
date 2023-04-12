@@ -4,17 +4,17 @@ import 'package:wave_frontend/models/message.dart';
 
 class MessagingService {
   // Replace with your own server's base URL
-  final String baseUrl = 'https://your-server-url.com/api';
+  final String baseUrl = 'http://127.0.0.1:8080';
 
   // Method to send a message to the backend
   Future<void> sendMessage(String content) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/messages'),
+      Uri.parse('$baseUrl/messages/create'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'content': content}),
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode >= 400) {
       throw Exception('Failed to send message');
     }
   }
@@ -29,5 +29,6 @@ class MessagingService {
     } else {
       throw Exception('Failed to load messages');
     }
+    
   }
 }
