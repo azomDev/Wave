@@ -8,11 +8,13 @@ class Message {
   // Method to create a Message object from a JSON map
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      id: json['id'],
+      id: json['id'].toString(),
       content: json['content'],
-      timestamp: DateTime.parse(json['timestamp']),
+      timestamp: json['timestamp'] != null
+        ? DateTime.parse(json['timestamp'])
+        : DateTime.now(), // Use the current time as a default value
     );
-  }
+}
 
   // Method to convert a Message object to a JSON map
   Map<String, dynamic> toJson() {

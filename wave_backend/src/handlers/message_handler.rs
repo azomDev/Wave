@@ -2,6 +2,7 @@ use crate::db::db_operations::{create_database, create_message, get_all_messages
 use actix_web::{get, post, web, HttpResponse, Responder};
 use serde::Deserialize;
 use serde_json::json;
+use log::{error, info};
 
 #[derive(Debug, Deserialize)]
 pub struct MessageContent {
@@ -10,7 +11,7 @@ pub struct MessageContent {
 
 #[post("/messages/create")]
 pub async fn create_message_handler(message_content: web::Json<MessageContent>) -> impl Responder {
-
+    info!("Creating a new message");
     let conn = match create_database() {
         Ok(conn) => conn,
         Err(_) => {
@@ -30,16 +31,31 @@ pub async fn create_message_handler(message_content: web::Json<MessageContent>) 
 pub async fn get_all_messages_handler() -> impl Responder {
     let conn = match create_database() {
         Ok(conn) => conn,
-        Err(_) => {
+        Err(e) => {
+            error!("Failed to connect to the database: {:?}", e);
             return HttpResponse::InternalServerError()
-                .json(json!({"error": "Failed to connect to the database"}))
+                .json(json!({"error": "Failed to connect to the database"}));
         }
     };
 
     match get_all_messages(&conn) {
-        Ok(messages) => HttpResponse::Ok().json(messages),
-        Err(_) => {
-            HttpResponse::InternalServerError().json(json!({"error": "Failed to fetch messages"}))
+        Ok(messages) => {
+            info!("Fetched all messages successfully.");
+            let messages_json: Vec<serde_json::Value> = messages
+                .into_iter()
+                .map(|message| {
+                    json!({
+                        "id": message.id,
+                        "content": message.content.to_string(), // Ensure content is a string
+                    })
+                })
+                .collect();
+            HttpResponse::Ok().json(messages_json)
+        }
+        Err(e) => {
+            error!("Failed to fetch messages: {:?}", e);
+            HttpResponse::InternalServerError()
+                .json(json!({"error": "Failed to fetch messages"}))
         }
     }
 }

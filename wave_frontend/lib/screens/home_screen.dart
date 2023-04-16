@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wave_frontend/components/message_input.dart';
 import 'package:wave_frontend/components/send_button.dart';
 import 'package:wave_frontend/services/messaging_service.dart';
@@ -12,13 +13,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final MessagingService _messagingService = MessagingService();
 
-  void _sendMessage() async {
+  void _sendMessage(BuildContext context) {
+    final messagingService = Provider.of<MessagingService>(context, listen: false);
+
     if (_messageController.text.isNotEmpty) {
-      // Send the message to the database using the messaging service
-      await _messagingService.sendMessage(_messageController.text);
-      // Clear the text box
+      messagingService.sendMessage(_messageController.text);
       _messageController.clear();
     }
   }
@@ -27,24 +27,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Simple Messaging App'),
+        title: Text('Wave'),
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           children: [
             Expanded(
-              // Use a FutureBuilder to handle the async nature of fetching messages
-              child: FutureBuilder(
-                future: _messagingService.getMessages(),
-                builder: (BuildContext context, AsyncSnapshot<List<Message>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error fetching messages'));
-                  } else {
-                    return MessageList(messages: snapshot.data!);
-                  }
+              child: Consumer<MessagingService>(
+                builder: (context, messagingService, child) {
+                  return MessageList(messages: messagingService.messages);
                 },
               ),
             ),
@@ -58,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(width: 10),
                 SendButton(
-                  onPressed: _sendMessage,
+                  onPressed: () => _sendMessage(context),
                 ),
               ],
             ),
