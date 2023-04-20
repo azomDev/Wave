@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 import '../models/conversation.dart';
 import 'package:telephony/telephony.dart';
-import 'dart:io';
-import '../background_sms_handler.dart';
+
+
+onBackgroundMessage(SmsMessage message) {
+  debugPrint("onBackgroundMessage called");
+}
 
 class MessageScreen extends StatefulWidget {
   final Conversation conversation;
@@ -18,6 +21,36 @@ class _MessageScreenState extends State<MessageScreen> {
   TextEditingController _controllerMessage = TextEditingController();
   String? _message;
   final Telephony telephony = Telephony.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  onMessage(SmsMessage message) async {
+    setState(() {
+      _message = message.body ?? "Error reading message body.";
+      widget.conversation.messages
+          .add('Received: ' + (_message ?? 'No message body'));
+    });
+  }
+
+  Future<void> initPlatformState() async {
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+
+    final bool? result = await telephony.requestPhoneAndSmsPermissions;
+
+    if (result != null && result) {
+      telephony.listenIncomingSms(
+          onNewMessage: onMessage, onBackgroundMessage: onBackgroundMessage);
+    }
+
+    if (!mounted) return;
+  }
 
   Future<void> _sendSMS(List<String> recipients) async {
     try {
@@ -35,23 +68,6 @@ class _MessageScreenState extends State<MessageScreen> {
       setState(() {
         _message = error.toString();
       });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (Platform.isAndroid) {
-      telephony.listenIncomingSms(
-        onNewMessage: (SmsMessage message) async {
-          setState(() {
-              widget.conversation.messages
-                  .add('Received: ' + (message.body ?? ''));
-          });
-        },
-        onBackgroundMessage: backgroundSmsHandler,
-        listenInBackground: true,
-      );
     }
   }
 
