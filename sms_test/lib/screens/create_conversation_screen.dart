@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:telephony/telephony.dart';
 import '../models/conversation.dart';
 import '../widgets/phone_input.dart';
 
@@ -24,7 +25,10 @@ class _CreateConversationScreenState extends State<CreateConversationScreen> {
                 : () {
                     Navigator.pop(
                       context,
-                      Conversation(recipients: recipients, messages: []),
+                      Conversation(
+                        recipients: recipients,
+                        messages: [],
+                      ),
                     );
                   },
           ),
@@ -33,12 +37,12 @@ class _CreateConversationScreenState extends State<CreateConversationScreen> {
       body: PhoneInput(
         onRecipientAdded: (String recipient) {
           setState(() {
-            recipients.add(recipient);
+            recipients.add("+1" + recipient);
           });
         },
         onRecipientRemoved: (String recipient) {
           setState(() {
-            recipients.remove(recipient);
+            recipients.remove("+1" + recipient);
           });
         },
       ),

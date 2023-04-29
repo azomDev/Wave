@@ -11,7 +11,7 @@ class ConversationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(conversation.recipients.join(', ')),
-      subtitle: Text(conversation.messages.isEmpty ? 'No messages' : conversation.messages.last),
+      subtitle: Text(conversation.snippet),
       onTap: onTap,
     );
   }

@@ -1,6 +1,20 @@
-class Conversation {
-  List<String> recipients;
-  List<String> messages;
+import 'package:telephony/telephony.dart';
 
-  Conversation({required this.recipients, required this.messages});
+class Conversation {
+  int? threadId;
+  List<String> recipients;
+  List<SmsMessage> messages;
+  String snippet = "";
+
+  void newMessage(SmsMessage message) {
+    messages.add(message);
+    snippet = message.body ?? snippet;
+  }
+
+  Conversation({
+    this.snippet = "",
+    this.threadId,
+    required this.recipients,
+    required this.messages,
+  });
 }
