@@ -47,8 +47,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Your Name - your_email@example.com
+Email - yayeetjbaited@gmail.com (my second-hand email)
 
-Project Link: [https://github.com/your_username/Wave](https://github.com/your_username/Wave)
+Project Link: [https://github.com/azomwastaken/Wave](https://github.com/azomwastaken/Wave)
 
 Join us in creating a future where communication is more integrated, customizable, and secure. Let's ride the Wave together.
