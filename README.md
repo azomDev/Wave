@@ -17,8 +17,7 @@ Wave is an open source, comprehensive messaging solution aiming to revolutionize
 
 Wave aims to support a broad range of messaging types including:
 
--   SMS
--   MMS
+-   SMS/MMS
 -   Server Messaging
 -   Email
 -   And more
