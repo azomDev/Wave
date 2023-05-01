@@ -56,7 +56,7 @@ Distributed under the GNU General Public License v3.0. See `LICENSE` for more in
 
 ## Contact
 
-Email - yayeetjbaited@gmail.com (my second-hand email)
+Email - azom.developer@gmail.com
 
 Join us in creating a future where communication is more integrated, customizable, and secure. Let's ride the Wave together.
 
