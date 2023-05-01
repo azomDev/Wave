@@ -12,10 +12,13 @@ import androidx.core.app.NotificationCompat
 import android.telephony.SmsMessage
 import android.util.Log
 import io.flutter.plugin.common.MethodChannel
+import android.telephony.TelephonyManager
 
 class SmsReceiver : BroadcastReceiver() {
 
     private lateinit var methodChannel: MethodChannel
+    val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    val userPhoneNumber = telephonyManager.line1Number
 
     fun setMethodChannel(methodChannel: MethodChannel) {
         this.methodChannel = methodChannel
@@ -25,17 +28,43 @@ class SmsReceiver : BroadcastReceiver() {
         if (intent.action == Telephony.Sms.Intents.SMS_DELIVER_ACTION) {
             val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             for (message in smsMessages) {
-                //! THis is temporary but I switched sender and recipient
-                val sms = SmsModel(
-                    id = 0, // id will be set by the database
-                    sender = "me",
-                    recipient = message.originatingAddress ?: "", //! set recipient as needed AND FORMAT IT
-                    message = message.messageBody,
-                    timestamp = System.currentTimeMillis().toString()
-                )
-
                 val smsDatabaseHandler = SmsDatabaseHandler(context)
-                smsDatabaseHandler.addSms(sms)
+
+                // Determine conversation ID based on the sender's phone number
+                val senderPhoneNumber = message.originatingAddress?.replace(Regex("[^0-9]"), "")
+                val conversationId = smsDatabaseHandler.getConversationId(senderPhoneNumberm, userPhoneNumber)
+
+                // If conversationId is null, this is a new conversation
+                if (conversationId == null) {
+                    // Create a new conversation
+                    val newConversation = ConversationModel(
+                        conversationId = 0, // id will be set by the database
+                    )
+                    smsDatabaseHandler.addConversation(newConversation)
+
+                    // Get the newly created conversation ID
+                    val newConversationId = smsDatabaseHandler.getConversationId(senderPhoneNumber)
+
+                    // Create a new message
+                    val newMessage = MessageModel(
+                        messageId = 0, // id will be set by the database
+                        conversationId = newConversationId,
+                        senderId = senderPhoneNumber,
+                        message = message.messageBody,
+                        timestamp = System.currentTimeMillis().toString()
+                    )
+                    smsDatabaseHandler.addMessage(newMessage)
+                } else {
+                    // Create a new message in the existing conversation
+                    val newMessage = MessageModel(
+                        messageId = 0, // id will be set by the database
+                        conversationId = conversationId,
+                        senderId = senderPhoneNumber,
+                        message = message.messageBody,
+                        timestamp = System.currentTimeMillis().toString()
+                    )
+                    smsDatabaseHandler.addMessage(newMessage)
+                }
 
                 showNotification(context, message)
             }

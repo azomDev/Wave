@@ -16,13 +16,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _messageController = TextEditingController();
   static const MethodChannel platform =
       const MethodChannel('com.example.receiving_test');
+  late String conversationId;
 
   Future<void> _sendMessage(String message) async {
     try {
       final Map<String, dynamic> sms = {
-        'recipient': widget.contactNumber,
         'message': message,
-        'timestamp': DateTime.now().toString(),
+        'conversationId': conversationId,
       };
       await _channel.invokeMethod('sendSms', sms);
       //setState(() {});
@@ -36,8 +36,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
     try {
       final List conversation =
           await platform.invokeMethod('getConversation', <String, dynamic>{
-        'recipient': myNumber,
-        'sender': contactNumber,
+        'sender': myNumber,
+        'recipient': contactNumber,
       });
       return List<Map>.from(conversation);
     } on PlatformException catch (e) {
@@ -79,6 +79,21 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Assuming 'me' is the user's phone number
+    // and widget.contactNumber is the other participant's number
+    _getConversation('me', widget.contactNumber).then((conversation) {
+      // Assuming the first message in the conversation contains the conversation ID
+      if (conversation.isNotEmpty) {
+        setState(() {
+          conversationId = conversation[0]['conversationId'];
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -100,8 +115,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
-                    _sendMessage(_messageController.text);
-                    _messageController.clear();
+                    if (_messageController.text.isNotEmpty) {
+                      _sendMessage(_messageController.text);
+                      _messageController.clear();
+                    }
                   },
                 ),
               ],

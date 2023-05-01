@@ -6,12 +6,16 @@ import io.flutter.plugin.common.MethodChannel
 import android.telephony.SmsManager
 import android.widget.Toast
 import com.example.receiving_test.SmsDatabaseHandler
-import com.example.receiving_test.SmsModel
+import com.example.receiving_test.MessageModel
 import android.util.Log
+import android.content.Context
+import android.telephony.TelephonyManager
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.example.receiving_test"
     private val smsReceiver = SmsReceiver()
+    val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    val userPhoneNumber = telephonyManager.line1Number
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,21 +26,20 @@ class MainActivity: FlutterActivity() {
             call, result ->
             when (call.method) {
                 "getConversation" -> {
-                    val sender = call.argument<String>("sender")
-                    val recipient = call.argument<String>("recipient")
-                    if (sender != null && recipient != null) {
-                        Log.d("MyApp", "Fetching conversation for $sender and $recipient")
-                        val conversation = smsDatabaseHandler.getConversation(sender, recipient)
+                    val conversationId = call.argument<Int>("conversationId")
+                    if (conversationId != null) {
+                        Log.d("MyApp", "Fetching conversation for conversation ID $conversationId")
+                        val conversation = smsDatabaseHandler.getConversation(conversationId)
                         if (conversation != null) {
                         Log.d("MyApp", "Successfully fetched conversation")
-                        // Convert each SmsModel to a Map
-                        val conversationMapList = conversation.map { smsModel ->
+                        // Convert each MessageModel to a Map
+                        val conversationMapList = conversation.map { messageModel ->
                             mapOf(
-                            "id" to smsModel.id,
-                            "sender" to smsModel.sender,
-                            "recipient" to smsModel.recipient,
-                            "message" to smsModel.message,
-                            "timestamp" to smsModel.timestamp
+                            "messageId" to messageModel.messageId,
+                            "conversationId" to messageModel.conversationId,
+                            "senderId" to messageModel.senderId,
+                            "message" to messageModel.message,
+                            "timestamp" to messageModel.timestamp
                             )
                         }
                         result.success(conversationMapList)
@@ -45,31 +48,42 @@ class MainActivity: FlutterActivity() {
                         result.error("UNAVAILABLE", "Could not fetch conversation", null)
                         }
                     } else {
-                        Log.e("MyApp", "Invalid sender or recipient")
+                        Log.e("MyApp", "Invalid conversation ID")
                         result.error("UNAVAILABLE", "Could not fetch conversation", null)
                     }
                 }
 
 
                 "sendSms" -> {
-                    val phoneNumber = call.argument<String>("recipient")
                     val message = call.argument<String>("message")
-                    if (phoneNumber != null && message != null) {
-                        sendSms(phoneNumber, message)
+                    val conversationId = call.argument<Int>("conversationId")
+                    val participants = smsDatabaseHandler.getAllParticipantsInConversation(conversationId)
 
-                        // Create SmsModel and insert into database
-                        val sms = SmsModel(
-                            id = 0, // You can replace this with proper ID generation logic
-                            sender = "me", // Adjust this as needed
-                            recipient = phoneNumber,
+                    if (participants.isNotEmpty() && message != null) {
+                        // for each participant, only send an sms (only add the sms once in the DB)
+                        for (participant in participants) {
+                            if (participant.participantId != userPhoneNumber) { // Do not send message to yourself
+                                sendSms(participant.participantId.toString(), message)
+                            }
+                        }
+
+                        // Create MessageModel and insert into database
+                        val sms = MessageModel(
+                            messageId = 0, // You can replace this with proper ID generation logic
+                            conversationId = conversationId,
+                            senderId = userPhoneNumber.toInt(),
                             message = message,
                             timestamp = System.currentTimeMillis().toString()
                         )
-                        smsDatabaseHandler.addSms(sms)
+                        smsDatabaseHandler.addMessage(sms)
                         result.success(null)
                     } else {
                         result.error("UNAVAILABLE", "Could not send SMS", null)
                     }
+                }
+
+                "getAllConversations" -> {
+                
                 }
 
                 else -> result.notImplemented()
@@ -79,8 +93,6 @@ class MainActivity: FlutterActivity() {
 
     private fun sendSms(phoneNumber: String, message: String) {
         try {
-            Log.d("MyApp", "Message: $message")
-            Log.d("MyApp", "number: $phoneNumber")
             val smsManager = SmsManager.getDefault()
             smsManager.sendTextMessage(phoneNumber, null, message, null, null)
             Toast.makeText(this, "SMS sent.", Toast.LENGTH_LONG).show()
