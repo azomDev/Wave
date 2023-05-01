@@ -3,7 +3,7 @@ package com.example.receiving_test
 import android.app.Activity
 import android.telephony.SmsManager
 import android.widget.Toast
-
+//! Is this file even needed?
 class SmsSender(private val activity: Activity) {
 
     fun sendSms(phoneNumber: String, message: String) {

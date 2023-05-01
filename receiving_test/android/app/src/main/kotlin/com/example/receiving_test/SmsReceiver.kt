@@ -11,13 +11,32 @@ import android.provider.Telephony
 import androidx.core.app.NotificationCompat
 import android.telephony.SmsMessage
 import android.util.Log
+import io.flutter.plugin.common.MethodChannel
 
 class SmsReceiver : BroadcastReceiver() {
+
+    private lateinit var methodChannel: MethodChannel
+
+    fun setMethodChannel(methodChannel: MethodChannel) {
+        this.methodChannel = methodChannel
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Telephony.Sms.Intents.SMS_DELIVER_ACTION) {
             val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             for (message in smsMessages) {
+                val sms = SmsModel(
+                    id = 0, // id will be set by the database
+                    sender = message.originatingAddress ?: "",
+                    recipient = "me", // set recipient as needed
+                    message = message.messageBody,
+                    timestamp = System.currentTimeMillis().toString()
+                )
+
+                //! I think this adds the message to another database.
+                val smsDatabaseHandler = SmsDatabaseHandler(context)
+                smsDatabaseHandler.addSms(sms)
+
                 showNotification(context, message)
             }
         }
