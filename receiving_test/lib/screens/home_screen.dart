@@ -7,9 +7,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Assuming a list of contact numbers for simplicity.
-  // In a real app, this data should be fetched from the device's contacts or a database.
-  final List<String> _contactNumbers = ['5147422074'];
+  final List<String> _contactNumbers = [];
+  final TextEditingController _textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -17,22 +16,48 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('SMS Conversations'),
       ),
-      body: ListView.builder(
-        itemCount: _contactNumbers.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text(_contactNumbers[index]),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ConversationScreen(contactNumber: _contactNumbers[index]),
-                ),
-              );
-            },
-          );
+      body: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _textEditingController,
+              decoration: InputDecoration(
+                labelText: 'Enter phone number',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.phone,
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _contactNumbers.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(_contactNumbers[index]),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ConversationScreen(
+                            contactNumber: _contactNumbers[index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _contactNumbers.add(_textEditingController.text);
+            _textEditingController.clear();
+          });
         },
+        child: Icon(Icons.add),
       ),
     );
   }

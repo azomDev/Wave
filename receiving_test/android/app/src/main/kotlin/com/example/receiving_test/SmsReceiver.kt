@@ -25,15 +25,15 @@ class SmsReceiver : BroadcastReceiver() {
         if (intent.action == Telephony.Sms.Intents.SMS_DELIVER_ACTION) {
             val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             for (message in smsMessages) {
+                //! THis is temporary but I switched sender and recipient
                 val sms = SmsModel(
                     id = 0, // id will be set by the database
-                    sender = message.originatingAddress ?: "",
-                    recipient = "me", // set recipient as needed
+                    sender = "me",
+                    recipient = message.originatingAddress ?: "", //! set recipient as needed AND FORMAT IT
                     message = message.messageBody,
                     timestamp = System.currentTimeMillis().toString()
                 )
 
-                //! I think this adds the message to another database.
                 val smsDatabaseHandler = SmsDatabaseHandler(context)
                 smsDatabaseHandler.addSms(sms)
 
