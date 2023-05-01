@@ -20,17 +20,27 @@ Wave aims to support a broad range of messaging types including:
 -   SMS/MMS
 -   Server Messaging
 -   Email
+-   Voice and video calls
+-   File sharing
 -   And more
 
 This wide array of messaging options allows users to consolidate their communications into one convenient platform.
 
-### Customization
+## Cross-Platform Synchronization
+
+Wave supports cross-platform synchronization. This allows users to seamlessly switch between devices (PC, mobile, tablet) and even send SMS from a computer when a phone is connected.
+
+## Customization
 
 One of the key aspects of Wave is its high level of customization. Wave plans to offer a wide range of options for modifying the user interface and the functionality of the app to suit individual needs and preferences.
 
-### Security
+## Multilingual Support and Chat Translation
 
-In this digital era, security is paramount. Wave is designed with this principle in mind, intending to offer encryption options for every type of messaging. We are even considering the potential of implementing post quantum cryptography to stay one step ahead of potential threats.
+To make Wave accessible to users around the world, we intend to offer multilingual support and chat translation.
+
+## Security
+
+In this digital era, security is paramount. Wave is designed with this principle in mind, intending to offer end-to-end encryption and local encryption options for every type of messaging. We are even considering the potential of implementing post quantum cryptography to stay one step ahead of potential threats.
 
 ## Getting Involved
 
