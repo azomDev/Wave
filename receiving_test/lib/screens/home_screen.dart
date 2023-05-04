@@ -68,52 +68,82 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('SMS Conversations'),
-      ),
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _textEditingController,
-              decoration: InputDecoration(
-                labelText: 'Enter phone number',
-                border: OutlineInputBorder(),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'SMS Conversations',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        backgroundColor: Color(0xFF2C2C2E), // Set the background color
+        body: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _textEditingController,
+                decoration: InputDecoration(
+                  labelText: 'Enter phone number',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
+                style: TextStyle(color: Colors.white),
+                keyboardType: TextInputType.phone,
+                onTap: () {
+                  FocusScope.of(context).requestFocus();
+                },
               ),
-              keyboardType: TextInputType.phone,
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _conversationIds.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: Text('Conversation ${_conversationIds[index]}'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ConversationScreen(
-                            conversationId: _conversationIds[index]),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _conversationIds.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(
+                      'Conversation ${_conversationIds[index]}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
                       ),
-                    );
-                  },
-                );
-              },
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ConversationScreen(
+                              conversationId: _conversationIds[index]),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_textEditingController.text.isNotEmpty) {
-            _createConversation(_textEditingController.text);
-            _textEditingController.clear();
-          }
-        },
-        child: Icon(Icons.add),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            if (_textEditingController.text.isNotEmpty) {
+              _createConversation(_textEditingController.text);
+              _textEditingController.clear();
+            }
+          },
+          child: Icon(Icons.add),
+          backgroundColor: Colors.blue,
+        ),
       ),
     );
   }

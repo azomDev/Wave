@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class ConversationScreen extends StatefulWidget {
   final int conversationId;
@@ -19,18 +20,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
   late int conversationId;
 
   Future<void> _sendMessage(String message) async {
-  try {
-    final Map<String, dynamic> sms = {
-      'message': message,
-      'conversationId': conversationId,
-    };
-    await _channel.invokeMethod('sendSms', sms);
-    setState(() {}); // Add this line to trigger a rebuild
-  } on PlatformException catch (e) {
-    print("Failed to add message: '${e.message}'.");
+    try {
+      final Map<String, dynamic> sms = {
+        'message': message,
+        'conversationId': conversationId,
+      };
+      await _channel.invokeMethod('sendSms', sms);
+      setState(() {}); // Add this line to trigger a rebuild
+    } on PlatformException catch (e) {
+      print("Failed to add message: '${e.message}'.");
+    }
   }
-}
-
 
   Future<List<Map>> _getConversation(int conversationId) async {
     try {
@@ -64,9 +64,30 @@ class _ConversationScreenState extends State<ConversationScreen> {
               itemCount: smsList.length,
               itemBuilder: (BuildContext context, int index) {
                 final Map<dynamic, dynamic> sms = smsList[index];
+
+                // Convert the timestamp to a DateTime object
+                DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(
+                    int.parse(sms['timestamp']));
+                String formattedTimestamp =
+                    DateFormat('MMM d, y h:mm a').format(timestamp);
+
                 return ListTile(
-                  title: Text(sms['message']),
-                  subtitle: Text(sms['timestamp']),
+                  title: Text(
+                    sms['message'],
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                  subtitle: Text(
+                    formattedTimestamp,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.white70,
+                    ),
+                  ),
                 );
               },
             );
@@ -95,36 +116,58 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.conversationId.toString()),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(child: _buildMessageList()),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(hintText: 'Type a message'),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () {
-                    if (_messageController.text.isNotEmpty) {
-                      _sendMessage(_messageController.text);
-                      _messageController.clear();
-                    }
-                  },
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.conversationId.toString(),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ],
+        ),
+        backgroundColor: Color(0xFF2C2C2E), // Set the background color
+        body: Column(
+          children: <Widget>[
+            Expanded(child: _buildMessageList()),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: InputDecoration(
+                        hintText: 'Type a message',
+                        hintStyle: TextStyle(color: Colors.white),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                      onTap: () {
+                        FocusScope.of(context).requestFocus();
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.send,
+                      color: Colors.blue,
+                    ),
+                    onPressed: () {
+                      if (_messageController.text.isNotEmpty) {
+                        _sendMessage(_messageController.text);
+                        _messageController.clear();
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
