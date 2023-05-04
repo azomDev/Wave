@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ConversationScreen extends StatefulWidget {
-  final String contactNumber;
+  final int conversationId;
 
-  ConversationScreen({required this.contactNumber});
+  ConversationScreen({required this.conversationId});
 
   @override
   _ConversationScreenState createState() => _ConversationScreenState();
@@ -16,29 +16,31 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _messageController = TextEditingController();
   static const MethodChannel platform =
       const MethodChannel('com.example.receiving_test');
-  late String conversationId;
+  late int conversationId;
 
   Future<void> _sendMessage(String message) async {
-    try {
-      final Map<String, dynamic> sms = {
-        'message': message,
-        'conversationId': conversationId,
-      };
-      await _channel.invokeMethod('sendSms', sms);
-      //setState(() {});
-    } on PlatformException catch (e) {
-      print("Failed to add message: '${e.message}'.");
-    }
+  try {
+    final Map<String, dynamic> sms = {
+      'message': message,
+      'conversationId': conversationId,
+    };
+    await _channel.invokeMethod('sendSms', sms);
+    setState(() {}); // Add this line to trigger a rebuild
+  } on PlatformException catch (e) {
+    print("Failed to add message: '${e.message}'.");
   }
+}
 
-  Future<List<Map>> _getConversation(
-      String myNumber, String contactNumber) async {
+
+  Future<List<Map>> _getConversation(int conversationId) async {
     try {
       final List conversation =
           await platform.invokeMethod('getConversation', <String, dynamic>{
-        'sender': myNumber,
-        'recipient': contactNumber,
+        'conversationId': conversationId,
       });
+      if (conversation.isEmpty) {
+        print("There was no message loaded");
+      }
       return List<Map>.from(conversation);
     } on PlatformException catch (e) {
       print("Failed to get conversation: '${e.message}'.");
@@ -48,7 +50,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   Widget _buildMessageList() {
     return FutureBuilder<List<Map<dynamic, dynamic>>>(
-      future: _getConversation('me', widget.contactNumber),
+      future: _getConversation(widget.conversationId),
       builder: (BuildContext context,
           AsyncSnapshot<List<Map<dynamic, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -81,10 +83,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    // Assuming 'me' is the user's phone number
-    // and widget.contactNumber is the other participant's number
-    _getConversation('me', widget.contactNumber).then((conversation) {
-      // Assuming the first message in the conversation contains the conversation ID
+    conversationId = widget.conversationId; // Add this line
+    _getConversation(widget.conversationId).then((conversation) {
       if (conversation.isNotEmpty) {
         setState(() {
           conversationId = conversation[0]['conversationId'];
@@ -97,7 +97,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.contactNumber),
+        title: Text(widget.conversationId.toString()),
       ),
       body: Column(
         children: <Widget>[

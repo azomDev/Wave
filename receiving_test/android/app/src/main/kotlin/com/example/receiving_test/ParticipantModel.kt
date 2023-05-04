@@ -1,6 +1,6 @@
 package com.example.receiving_test
 
 data class ParticipantModel(
-    var participantId: Int = 0,
-    var phoneNumber: String = ""
+    var conversationId: Int = 0,
+    var userId: Int = 0
 )

@@ -14,8 +14,6 @@ import android.telephony.TelephonyManager
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.example.receiving_test"
     private val smsReceiver = SmsReceiver()
-    val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    val userPhoneNumber = telephonyManager.line1Number
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,62 +26,69 @@ class MainActivity: FlutterActivity() {
                 "getConversation" -> {
                     val conversationId = call.argument<Int>("conversationId")
                     if (conversationId != null) {
-                        Log.d("MyApp", "Fetching conversation for conversation ID $conversationId")
-                        val conversation = smsDatabaseHandler.getConversation(conversationId)
-                        if (conversation != null) {
-                        Log.d("MyApp", "Successfully fetched conversation")
-                        // Convert each MessageModel to a Map
-                        val conversationMapList = conversation.map { messageModel ->
+                        val messageModels = smsDatabaseHandler.getMessagesFromConversation(conversationId)
+                        val messageMaps = messageModels.map {
                             mapOf(
-                            "messageId" to messageModel.messageId,
-                            "conversationId" to messageModel.conversationId,
-                            "senderId" to messageModel.senderId,
-                            "message" to messageModel.message,
-                            "timestamp" to messageModel.timestamp
+                                "messageId" to it.messageId,
+                                "conversationId" to it.conversationId,
+                                "senderId" to it.senderId,
+                                "message" to it.message,
+                                "timestamp" to it.timestamp
                             )
                         }
-                        result.success(conversationMapList)
-                        } else {
-                        Log.e("MyApp", "Failed to fetch conversation from database")
-                        result.error("UNAVAILABLE", "Could not fetch conversation", null)
-                        }
+                        result.success(messageMaps)
                     } else {
-                        Log.e("MyApp", "Invalid conversation ID")
-                        result.error("UNAVAILABLE", "Could not fetch conversation", null)
+                        Log.d("MyApp", "Conversation ID cannot be null")
+                        result.error("INVALID_ARGUMENT", "Conversation ID cannot be null", null)
                     }
                 }
-
 
                 "sendSms" -> {
                     val message = call.argument<String>("message")
                     val conversationId = call.argument<Int>("conversationId")
-                    val participants = smsDatabaseHandler.getAllParticipantsInConversation(conversationId)
+                    val users = smsDatabaseHandler.getAllUsersInConversation(conversationId!!)
 
-                    if (participants.isNotEmpty() && message != null) {
-                        // for each participant, only send an sms (only add the sms once in the DB)
-                        for (participant in participants) {
-                            if (participant.participantId != userPhoneNumber) { // Do not send message to yourself
-                                sendSms(participant.participantId.toString(), message)
+                    if (users.isNotEmpty() && message != null) {
+                        for (user in users) {
+                            val userPhoneNumber = user.phoneNumber
+                            if (userPhoneNumber != "me") { // Do not send message to yourself
+                                sendSms(userPhoneNumber, message)
+                                Log.d("MyApp", "Sending message to: $userPhoneNumber")
                             }
                         }
 
-                        // Create MessageModel and insert into database
                         val sms = MessageModel(
-                            messageId = 0, // You can replace this with proper ID generation logic
-                            conversationId = conversationId,
-                            senderId = userPhoneNumber.toInt(),
+                            messageId = 0, // Replace this with proper ID generation logic
+                            conversationId = conversationId!!,
+                            senderId = smsDatabaseHandler.createOrReturnUser("me"),
                             message = message,
                             timestamp = System.currentTimeMillis().toString()
                         )
                         smsDatabaseHandler.addMessage(sms)
-                        result.success(null)
+                        result.success(message)
                     } else {
+                        Log.d("MyApp", "Could not send SMS, messages or participants is empty")
                         result.error("UNAVAILABLE", "Could not send SMS", null)
                     }
                 }
 
                 "getAllConversations" -> {
-                
+                    result.success(smsDatabaseHandler.getAllConversations())
+                }
+
+                "createNewConversation" -> {
+                    result.success(smsDatabaseHandler.createNewConversation())
+                }
+
+                "createNewUser" -> {
+                    val phoneNumber = call.argument<String>("phoneNumber")
+                    result.success(smsDatabaseHandler.createOrReturnUser(phoneNumber!!))
+                }
+
+                "createNewParticipant" -> {
+                    val userId = call.argument<Int>("userId")
+                    val conversationId = call.argument<Int>("conversationId")
+                    result.success(smsDatabaseHandler.createNewParticipant(userId!!, conversationId!!))
                 }
 
                 else -> result.notImplemented()

@@ -17,8 +17,6 @@ import android.telephony.TelephonyManager
 class SmsReceiver : BroadcastReceiver() {
 
     private lateinit var methodChannel: MethodChannel
-    val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    val userPhoneNumber = telephonyManager.line1Number
 
     fun setMethodChannel(methodChannel: MethodChannel) {
         this.methodChannel = methodChannel
@@ -27,44 +25,30 @@ class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Telephony.Sms.Intents.SMS_DELIVER_ACTION) {
             val smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
+            val smsDatabaseHandler = SmsDatabaseHandler(context)
             for (message in smsMessages) {
-                val smsDatabaseHandler = SmsDatabaseHandler(context)
-
                 // Determine conversation ID based on the sender's phone number
-                val senderPhoneNumber = message.originatingAddress?.replace(Regex("[^0-9]"), "")
-                val conversationId = smsDatabaseHandler.getConversationId(senderPhoneNumberm, userPhoneNumber)
+                var senderPhoneNumber = message.originatingAddress?.replace(Regex("[^0-9]"), "")
+                senderPhoneNumber = senderPhoneNumber!!.drop(1) //! Temporary
+                Log.d("SmsReceiver", "Message received from $senderPhoneNumber containing: ${message.messageBody}")
+                val senderId = smsDatabaseHandler.createOrReturnUser(senderPhoneNumber!!)
+                var conversationId = smsDatabaseHandler.getConversationId(senderId)
+                if (conversationId == null) {
+                    Log.d("SmsReceiver", "Received a message that is not associated to any conversation. Creating a new one")
+                    conversationId = smsDatabaseHandler.createNewConversation()
+                    smsDatabaseHandler.createNewParticipant(senderId, conversationId)
+                }
 
                 // If conversationId is null, this is a new conversation
-                if (conversationId == null) {
-                    // Create a new conversation
-                    val newConversation = ConversationModel(
-                        conversationId = 0, // id will be set by the database
-                    )
-                    smsDatabaseHandler.addConversation(newConversation)
-
-                    // Get the newly created conversation ID
-                    val newConversationId = smsDatabaseHandler.getConversationId(senderPhoneNumber)
-
-                    // Create a new message
-                    val newMessage = MessageModel(
-                        messageId = 0, // id will be set by the database
-                        conversationId = newConversationId,
-                        senderId = senderPhoneNumber,
-                        message = message.messageBody,
-                        timestamp = System.currentTimeMillis().toString()
-                    )
-                    smsDatabaseHandler.addMessage(newMessage)
-                } else {
-                    // Create a new message in the existing conversation
-                    val newMessage = MessageModel(
-                        messageId = 0, // id will be set by the database
-                        conversationId = conversationId,
-                        senderId = senderPhoneNumber,
-                        message = message.messageBody,
-                        timestamp = System.currentTimeMillis().toString()
-                    )
-                    smsDatabaseHandler.addMessage(newMessage)
-                }
+                // Create a new message
+                val newMessage = MessageModel(
+                    messageId = 0, // id will be set by the database
+                    conversationId = conversationId!!,
+                    senderId = senderId,
+                    message = message.messageBody,
+                    timestamp = System.currentTimeMillis().toString()
+                )
+                smsDatabaseHandler.addMessage(newMessage)
 
                 showNotification(context, message)
             }
@@ -81,7 +65,7 @@ class SmsReceiver : BroadcastReceiver() {
                 "SMS Notifications",
                 NotificationManager.IMPORTANCE_HIGH
             )
-
+            
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }

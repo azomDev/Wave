@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
+import android.database.Cursor
 
 class SmsDatabaseHandler(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -14,14 +16,12 @@ class SmsDatabaseHandler(context: Context) :
 
         private const val TABLE_CONVERSATIONS = "conversations"
         private const val KEY_CONVERSATION_ID = "conversation_id"
-        private const val KEY_CREATED_AT = "created_at"
+
+        private const val TABLE_USERS = "users"
+        private const val KEY_USER_ID = "user_id"
+        private const val KEY_USER_PHONE_NUMBER = "user_phone_number"
 
         private const val TABLE_PARTICIPANTS = "participants"
-        private const val KEY_PARTICIPANT_ID = "participant_id"
-        private const val KEY_PARTICIPANT_NAME = "participant_name"
-
-        private const val TABLE_CONVERSATION_PARTICIPANTS = "conversation_participants"
-        private const val KEY_JOINED_AT = "joined_at"
 
         private const val TABLE_MESSAGES = "messages"
         private const val KEY_MESSAGE_ID = "message_id"
@@ -30,26 +30,35 @@ class SmsDatabaseHandler(context: Context) :
         private const val KEY_TIMESTAMP = "timestamp"
     }
 
-    //! Check if onCreate is good
     override fun onCreate(db: SQLiteDatabase?) {
-        val createConversationsTable = ("CREATE TABLE " + TABLE_CONVERSATIONS + "("
-                + KEY_CONVERSATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_CREATED_AT + " TEXT)")
+        val createConversationsTable = """CREATE TABLE $TABLE_CONVERSATIONS(
+                $KEY_CONVERSATION_ID INTEGER PRIMARY KEY AUTOINCREMENT
+                )"""
 
-        val createParticipantsTable = ("CREATE TABLE " + TABLE_PARTICIPANTS + "("
-                + KEY_PARTICIPANT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_PARTICIPANT_NAME + " TEXT)")
+        val createUsersTable = """CREATE TABLE $TABLE_USERS(
+                $KEY_USER_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $KEY_USER_PHONE_NUMBER TEXT
+                )"""
 
-        val createMessagesTable = ("CREATE TABLE " + TABLE_MESSAGES + "("
-                + KEY_MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_CONVERSATION_ID + " INTEGER,"
-                + KEY_SENDER_ID + " INTEGER,"
-                + KEY_CONTENT + " TEXT,"
-                + KEY_TIMESTAMP + " TEXT,"
-                + "FOREIGN KEY(" + KEY_CONVERSATION_ID + ") REFERENCES " + TABLE_CONVERSATIONS + "(" + KEY_CONVERSATION_ID + "),"
-                + "FOREIGN KEY(" + KEY_SENDER_ID + ") REFERENCES " + TABLE_PARTICIPANTS + "(" + KEY_PARTICIPANT_ID + "))")
+        val createParticipantsTable = """CREATE TABLE $TABLE_PARTICIPANTS(
+                $KEY_USER_ID INTEGER,
+                $KEY_CONVERSATION_ID INTEGER,
+                FOREIGN KEY($KEY_USER_ID) REFERENCES $TABLE_USERS($KEY_USER_ID),
+                FOREIGN KEY($KEY_CONVERSATION_ID) REFERENCES $TABLE_CONVERSATIONS($KEY_CONVERSATION_ID)
+                )"""
+
+        val createMessagesTable = """CREATE TABLE $TABLE_MESSAGES(
+                $KEY_MESSAGE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $KEY_CONVERSATION_ID  INTEGER,
+                $KEY_SENDER_ID INTEGER,
+                $KEY_CONTENT TEXT,
+                $KEY_TIMESTAMP TEXT,
+                FOREIGN KEY($KEY_CONVERSATION_ID) REFERENCES $TABLE_CONVERSATIONS($KEY_CONVERSATION_ID),
+                FOREIGN KEY($KEY_SENDER_ID) REFERENCES $TABLE_USERS($KEY_USER_ID)
+                )"""
 
         db?.execSQL(createConversationsTable)
+        db?.execSQL(createUsersTable)
         db?.execSQL(createParticipantsTable)
         db?.execSQL(createMessagesTable)
     }
@@ -57,70 +66,32 @@ class SmsDatabaseHandler(context: Context) :
         override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         // Drop old tables if they exist
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_MESSAGES")
-        db?.execSQL("DROP TABLE IF EXISTS $TABLE_PARTICIPANTS")
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_CONVERSATIONS")
-        db?.execSQL("DROP TABLE IF EXISTS $TABLE_CONVERSATION_PARTICIPANTS")
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_PARTICIPANTS")
 
         // Create tables again
         onCreate(db)
     }
 
-    //! Check if addMessage is good
     fun addMessage(message: MessageModel) {
         val db = this.writableDatabase
 
-        // You'll need to create or fetch participant IDs for the sender
-        val senderId = message.senderId
-
-        // Check if sender is already in the participants table, and add them if not
-        val selectParticipantQuery = "SELECT * FROM $TABLE_PARTICIPANTS WHERE $KEY_PARTICIPANT_ID = ?"
-        var cursor = db.rawQuery(selectParticipantQuery, arrayOf(senderId.toString()))
-        if (!cursor.moveToFirst()) {
-            val values = ContentValues()
-            values.put(KEY_PARTICIPANT_ID, senderId)
-            // Replace with actual name if available
-            db.insert(TABLE_PARTICIPANTS, null, values)
+        // Add the message to the messages table with the appropriate conversation ID and sender ID
+        val messageValues = ContentValues().apply {
+            put(KEY_CONVERSATION_ID, message.conversationId)
+            put(KEY_SENDER_ID, message.senderId)
+            put(KEY_CONTENT, message.message)
+            put(KEY_TIMESTAMP, message.timestamp)
         }
         
-        // Check if a conversation already exists for the sender
-        val selectConversationQuery = "SELECT * FROM $TABLE_CONVERSATIONS WHERE $KEY_CONVERSATION_ID = ?"
-        cursor = db.rawQuery(selectConversationQuery, arrayOf(message.conversationId.toString()))
-
-        var conversationId: Int
-
-        if (cursor.moveToFirst()) {
-            // If a conversation exists, get its ID
-            conversationId = Integer.parseInt(cursor.getString(0))
-        } else {
-            // If no conversation exists, create a new one and get its ID
-            val conversationValues = ContentValues()
-            conversationValues.put(KEY_CONVERSATION_ID, message.conversationId)
-            conversationValues.put(KEY_CREATED_AT, message.timestamp) // Or current timestamp
-            conversationId = db.insert(TABLE_CONVERSATIONS, null, conversationValues).toInt()
-
-            // Add the sender to the conversation
-            val conversationParticipantValues = ContentValues()
-            conversationParticipantValues.put(KEY_CONVERSATION_ID, conversationId)
-            conversationParticipantValues.put(KEY_PARTICIPANT_ID, senderId)
-            conversationParticipantValues.put(KEY_JOINED_AT, message.timestamp) // Or current timestamp
-            db.insert(TABLE_CONVERSATION_PARTICIPANTS, null, conversationParticipantValues)
-        }
-
-        // Add the message to the messages table with the appropriate conversation ID and sender ID
-        val messageValues = ContentValues()
-        messageValues.put(KEY_MESSAGE_ID, message.messageId)
-        messageValues.put(KEY_CONVERSATION_ID, conversationId)
-        messageValues.put(KEY_SENDER_ID, senderId)
-        messageValues.put(KEY_CONTENT, message.message)
-        messageValues.put(KEY_TIMESTAMP, message.timestamp)
         db.insert(TABLE_MESSAGES, null, messageValues)
-
-        cursor.close()
+        Log.d("MyApp", "The message $message.message was added to the database")
         db.close()
     }
 
-    //! Check if getConversation is good
-    fun getConversation(conversationId: Int): List<MessageModel> {
+
+    fun getMessagesFromConversation(conversationId: Int): List<MessageModel> {
         val messageList = ArrayList<MessageModel>()
         val db = this.readableDatabase
 
@@ -128,75 +99,247 @@ class SmsDatabaseHandler(context: Context) :
         val selectQuery = "SELECT * FROM $TABLE_MESSAGES WHERE $KEY_CONVERSATION_ID = ? ORDER BY $KEY_TIMESTAMP DESC"
         val messageCursor = db.rawQuery(selectQuery, arrayOf(conversationId.toString()))
 
-        if (messageCursor.moveToFirst()) {
-            do {
-                val message = MessageModel()
-                message.messageId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_MESSAGE_ID)))
-                message.conversationId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_CONVERSATION_ID)))
-                message.senderId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_SENDER_ID)))
-                message.message = messageCursor.getString(messageCursor.getColumnIndex(KEY_CONTENT))
-                message.timestamp = messageCursor.getString(messageCursor.getColumnIndex(KEY_TIMESTAMP))
-                messageList.add(message)
-            } while (messageCursor.moveToNext())
+        while (messageCursor.moveToNext()) {
+            val message = MessageModel()
+            message.messageId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_MESSAGE_ID)))
+            message.conversationId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_CONVERSATION_ID)))
+            message.senderId = Integer.parseInt(messageCursor.getString(messageCursor.getColumnIndex(KEY_SENDER_ID)))
+            message.message = messageCursor.getString(messageCursor.getColumnIndex(KEY_CONTENT))
+            message.timestamp = messageCursor.getString(messageCursor.getColumnIndex(KEY_TIMESTAMP))
+            messageList.add(message)
         }
         messageCursor.close()
+        db.close()
 
         return messageList
     }
 
-    //! Check if getAllConversation is good
-    fun getAllConversations(): List<ConversationModel> {
-        val db = this.readableDatabase
-        val allConversations = "SELECT * FROM $TABLE_CONVERSATIONS"
-        val conversationList = mutableListOf<ConversationModel>()
-        val cursor = db.rawQuery(allConversations, null)
+    fun getAllConversations(): List<Int> {
+        val conversationList = ArrayList<Int>()
 
-        while (cursor.moveToNext()) {
-            val id = cursor.getInt(cursor.getColumnIndex(KEY_CONVERSATION_ID))
-            val createdAt = cursor.getString(cursor.getColumnIndex(KEY_CREATED_AT))
+        try {
+            val db = this.readableDatabase
+            val allConversations = "SELECT * FROM $TABLE_CONVERSATIONS"
 
-            val conversation = ConversationModel(id)
-            conversationList.add(conversation)
+            val cursor = db.rawQuery(allConversations, null)
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getInt(cursor.getColumnIndex(KEY_CONVERSATION_ID))
+                conversationList.add(id)
+            }
+
+            cursor.close()
+            db.close()
+
+            Log.d("Database", "Successfully fetched all conversations")
+
+        } catch (e: Exception) {
+            Log.e("Database", "Failed to fetch all conversations", e)
         }
 
-        cursor.close()
         return conversationList
     }
 
-    //! Check if getAllParticipantsInConversation is good
-    fun getAllParticipantsInConversation(conversationId: Int) : List<ParticipantModel> {
+
+    fun getAllUsersInConversation(conversationId: Int) : List<UserModel> {
+        val participantList = mutableListOf<UserModel>()
         val db = this.readableDatabase
-        val selectParticipantsQuery = ("SELECT * FROM $TABLE_PARTICIPANTS WHERE $KEY_PARTICIPANT_ID IN " +
-                "(SELECT $KEY_PARTICIPANT_ID FROM $TABLE_CONVERSATION_PARTICIPANTS WHERE $KEY_CONVERSATION_ID = ?)")
-        val cursor = db.rawQuery(selectParticipantsQuery, arrayOf(conversationId.toString()))
-        val participantList = mutableListOf<ParticipantModel>()
 
-        while (cursor.moveToNext()) {
-            val id = cursor.getInt(cursor.getColumnIndex(KEY_PARTICIPANT_ID))
-            val name = cursor.getString(cursor.getColumnIndex(KEY_PARTICIPANT_NAME))
-
-            val participant = ParticipantModel(id, name)
-            participantList.add(participant)
+        try {
+            val selectParticipantsQuery = """SELECT * FROM $TABLE_USERS
+                    WHERE $KEY_USER_ID IN
+                    (SELECT $KEY_USER_ID FROM $TABLE_PARTICIPANTS 
+                    WHERE $KEY_CONVERSATION_ID = ?)"""
+            val cursor = db.rawQuery(selectParticipantsQuery, arrayOf(conversationId.toString()))
+        
+            while (cursor.moveToNext()) {
+                val id = cursor.getInt(cursor.getColumnIndex(KEY_USER_ID))
+                val phoneNumber = cursor.getString(cursor.getColumnIndex(KEY_USER_PHONE_NUMBER))
+                participantList.add(UserModel(id, phoneNumber))
+            }
+            cursor.close()
+        } catch (e: Exception) {
+            Log.e("Database", "Failed to fetch users in conversation", e)
+        } finally {
+            db.close()
         }
 
-        cursor.close()
         return participantList
     }
 
-    //! Check if getConversationId is good and if it is needed
-    fun getConversationId(sender: String, recipient: String): String? {
+    fun getConversationId(senderId: Int): Int? {
         val db = this.readableDatabase
-        val selectQuery = "SELECT * FROM $TABLE_CONVERSATIONS WHERE ($COLUMN_PARTICIPANT_ONE = ? AND $COLUMN_PARTICIPANT_TWO = ?) OR ($COLUMN_PARTICIPANT_ONE = ? AND $COLUMN_PARTICIPANT_TWO = ?)"
-        val cursor = db.rawQuery(selectQuery, arrayOf(sender, recipient, recipient, sender))
+        var cursor: Cursor? = null
+        try {
+            val myId = createOrReturnUser("me", db)
 
-        if (cursor.moveToFirst()) {
-            val conversationId = cursor.getString(cursor.getColumnIndex(COLUMN_ID))
+            val selectQuery = """
+                SELECT $KEY_CONVERSATION_ID FROM $TABLE_PARTICIPANTS 
+                WHERE $KEY_USER_ID IN (?, ?)
+                GROUP BY $KEY_CONVERSATION_ID
+                HAVING COUNT(DISTINCT $KEY_USER_ID) = 2
+            """
+            cursor = db.rawQuery(selectQuery, arrayOf(senderId.toString(), myId.toString()))
+
+            if (cursor.moveToFirst()) {
+                val conversationId = cursor.getInt(cursor.getColumnIndex(KEY_CONVERSATION_ID))
+                Log.d("Database", "Conversation id: $conversationId was fetched")
+                return conversationId
+            }
+        } catch (e: Exception) {
+            Log.e("Database", "Failed to fetch conversation id", e)
+        } finally {
+            cursor?.close()
+            db.close()
+        }
+        return null
+    }
+
+    fun createNewConversation(): Int {
+        var conversationId = -1
+
+        try {
+            val db = this.writableDatabase
+
+            // Create a new conversation
+            db.execSQL("INSERT INTO $TABLE_CONVERSATIONS DEFAULT VALUES")
+
+            // Get the ID of the newly inserted conversation
+            val cursor = db.rawQuery("SELECT last_insert_rowid()", null)
+            if (cursor.moveToFirst()) {
+                conversationId = cursor.getInt(0)
+            }
             cursor.close()
-            return conversationId
+
+            val userId = createOrReturnUser("me")
+            createNewParticipant(userId, conversationId)
+
+            db.close()
+
+            Log.d("Database", "Successfully created new conversation with ID: $conversationId")
+
+        } catch (e: Exception) {
+            Log.e("Database", "Failed to create new conversation", e)
         }
 
-        cursor.close()
-        return null
+        return conversationId
+    }
+
+    fun createOrReturnUser(phoneNumber: String, dbParam: SQLiteDatabase? = null): Int {
+        var userId = -1
+        var cursor: Cursor? = null
+        val db: SQLiteDatabase
+        val shouldCloseDb: Boolean
+
+        if (dbParam == null) {
+            db = this.readableDatabase
+            shouldCloseDb = true
+        } else {
+            db = dbParam
+            shouldCloseDb = false
+        }
+
+        try {
+            // Query to check if user already exists
+            val selectQuery = """SELECT $KEY_USER_ID FROM $TABLE_USERS 
+            WHERE $KEY_USER_PHONE_NUMBER = ?"""
+            cursor = db.rawQuery(selectQuery, arrayOf(phoneNumber))
+
+            // If user exists, return their ID
+            if (cursor.moveToFirst()) {
+                userId = cursor.getInt(cursor.getColumnIndex(KEY_USER_ID))
+                Log.d("Database", "User exists with ID: $userId and phone number: $phoneNumber")
+                return userId
+            }
+            cursor.close()
+
+            // User does not exist, so create a new one
+            val userValues = ContentValues().apply {
+                put(KEY_USER_PHONE_NUMBER, phoneNumber)
+            }
+
+            // Insert the new user into the table and get its ID
+            userId = db.insert(TABLE_USERS, null, userValues).toInt()
+
+            // If insert failed, db.insert() returns -1
+            if (userId == -1) {
+                Log.e("Database", "Failed to create new user")
+                return userId
+            }
+
+            Log.d("Database", "Successfully created new user with ID: $userId")
+
+        } catch (e: Exception) {
+            Log.e("Database", "Failed to create or return user", e)
+        } finally {
+            cursor?.close()
+            if (shouldCloseDb) {
+                db.close()
+            }
+        }
+
+        return userId
+    }
+
+    fun createNewParticipant(userId: Int, conversationId: Int): Boolean {
+        try {
+            val db = this.writableDatabase
+
+            // Create a participant user
+            val participantValues = ContentValues().apply {
+                put(KEY_USER_ID, userId)
+                put(KEY_CONVERSATION_ID, conversationId)
+            }
+
+            // Insert the new participant into the table
+            val newRowId = db.insert(TABLE_PARTICIPANTS, null, participantValues)
+
+            db.close()
+
+            if (newRowId == -1L) {
+                Log.e("Database", "Failed to create new participant")
+                return false
+            }
+
+            Log.d("Database", "Successfully created new participant with ID: $userId and conversationID: $conversationId")
+            return true
+
+        } catch (e: Exception) {
+            Log.e("Database", "Failed to create new participant", e)
+            return false
+        }
+    }
+
+    fun getUser(userId: Int): UserModel? {
+        try {
+            val db = this.readableDatabase
+
+            val selectQuery = "SELECT * FROM $TABLE_USERS WHERE $KEY_USER_ID = ?"
+            val cursor = db.rawQuery(selectQuery, arrayOf(userId.toString()))
+
+            var user: UserModel? = null
+
+            if (cursor.moveToFirst()) {
+                val id = cursor.getInt(cursor.getColumnIndex(KEY_USER_ID))
+                val phoneNumber = cursor.getString(cursor.getColumnIndex(KEY_USER_PHONE_NUMBER))
+                user = UserModel(id, phoneNumber)
+            }
+
+            cursor.close()
+            db.close()
+
+            if (user == null) {
+                Log.e("Database", "Failed to get user with ID: $userId")
+                return null
+            }
+
+            Log.d("Database", "Successfully fetched user with ID: $userId")
+            return user
+
+        } catch (e: Exception) {
+            Log.e("Database", "Failed to get user with ID: $userId", e)
+            return null
+        }
     }
 
 }
