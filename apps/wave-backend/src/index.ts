@@ -15,6 +15,8 @@ const server = Bun.serve<{ username: string }>({
             ws.publish("the-group-chat", msg);
         },
         message(ws, message) {
+            console.log("Received", message, "from", ws.data.username);
+            ws.send("The message has been sent to the group.");
             // the server re-broadcasts incoming messages to everyone
             ws.publish("the-group-chat", `${ws.data.username}: ${message}`);
         },
