@@ -1,6 +1,20 @@
 <script lang="ts">
     import Greet from "./lib/Greet.svelte";
     import { MyCounterButton } from "ui";
+    import WebSocket from "tauri-plugin-websocket-api";
+
+    const backendws = WebSocket.connect("ws://localhost:3000");
+    backendws.then((ws) =>
+        ws.addListener((message) => {
+            console.log("🚀 ~ message:", message.data);
+        })
+    );
+
+    async function Click() {
+        const ws = await backendws;
+        console.log("🚀 ~ file: App.svelte:15 ~ Click ~ ws:", ws);
+        await ws.send("Hello World");
+    }
 </script>
 
 <main class="container">
@@ -21,6 +35,8 @@
     <MyCounterButton />
 
     <p>Click on the Tauri, Vite, and Svelte logos to learn more.</p>
+
+    <button on:click={Click}>ws</button>
 
     <div class="row">
         <Greet />

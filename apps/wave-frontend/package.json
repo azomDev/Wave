@@ -13,7 +13,8 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.5.1"
+    "@tauri-apps/api": "^1.5.1",
+    "tauri-plugin-websocket-api": "https://github.com/tauri-apps/tauri-plugin-websocket#v1"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
