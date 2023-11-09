@@ -1,22 +1,25 @@
 {
-  "private": true,
-  "scripts": {
-    "build": "turbo run build",
-    "web": "turbo run web",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write ."
-  },
-  "devDependencies": {
-    "eslint": "^8.0.0",
-    "eslint-config-custom": "*",
-    "prettier": "^2.7.1",
-    "prettier-plugin-svelte": "^2.7.0",
-    "turbo": "latest"
-  },
-  "packageManager": "bun@1.0.7",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+    "private": true,
+    "scripts": {
+        "build": "turbo run build",
+        "web": "turbo run web",
+        "dev": "turbo run dev",
+        "lint": "turbo run lint",
+        "format": "prettier --write ."
+    },
+    "devDependencies": {
+        "@tailwindcss/forms": "^0.5.6",
+        "eslint": "^8.0.0",
+        "prettier": "^3.0.3",
+        "prettier-plugin-organize-imports": "^3.2.3",
+        "prettier-plugin-svelte": "^3.0.3",
+        "prettier-plugin-tailwindcss": "^0.5.7",
+        "tailwindcss": "^3.3.5",
+        "turbo": "latest"
+    },
+    "packageManager": "bun@1.0.7",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ]
 }

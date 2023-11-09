@@ -6,10 +6,10 @@
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
-    "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
     "web": "vite",
     "web:build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "tauri": "tauri"
   },
   "dependencies": {

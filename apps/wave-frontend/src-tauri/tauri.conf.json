@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "wave_frontend",
+    "productName": "wave-frontend",
     "version": "0.0.0"
   },
   "tauri": {
