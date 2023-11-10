@@ -1,16 +1,15 @@
 # Wave - All-in-One Messaging App
 
-Wave is an open source, comprehensive messaging solution aiming to revolutionize the way we communicate. By centralizing SMS, MMS, server messaging, email, and other messaging types into one application, Wave intends to provide an integrated and seamless communication experience. This project utilizes Typescript, Svelte and SQLite for app development and Rust for server-side messaging.
+Wave is an open source, comprehensive messaging solution aiming to revolutionize the way we communicate. By centralizing SMS, MMS, server messaging, email, and other messaging types into one application, Wave intends to provide an integrated and seamless communication experience.
 
 ## Technologies
 
 -   Tauri for creating cross-platform desktop (and soon mobile) applications
--   Typescript for app development
 -   Sveltekit for creating the user interface
--   Bun for building and optimizing code
+-   Typescript for frontend and server development
+-   Bun for building and optimizing frontend and server code
 -   Vite for efficient development and building
--   Rust for server-side messaging
--   SQLite for local and server-side database storage
+-   postgreSQL for local and server-side database storage
 
 ## Features
 
