@@ -2,24 +2,25 @@ import { Elysia, t } from "elysia";
 
 const app = new Elysia()
     .get("/", () => "Hello Elysia")
-    .ws("/client", {
+    .ws("/chat/:chatId", {
+        params: t.Object({ chatId: t.String({ minLength: 20, maxLength: 20 }) }),
         body: t.Object({
             username: t.String(),
             message: t.String(),
         }),
         open(ws) {
-            const msg = `${ws.data.body.username} has entered the chat`;
+            const msg = `${ws.remoteAddress} has entered the chat`;
             ws.subscribe("the-group-chat");
             ws.publish("the-group-chat", { message: msg });
         },
         message(ws, message) {
-            console.log("Received", message.username, "from", message.username);
+            console.log("Received", message.message, "from", message.username);
             ws.send("The message has been sent to the group.");
             // the server re-broadcasts incoming messages to everyone
             ws.publish("the-group-chat", message);
         },
         close(ws) {
-            const msg = `${ws.data.body.username} has left the chat`;
+            const msg = `${ws.remoteAddress} has left the chat`;
             ws.publish("the-group-chat", { message: msg });
             ws.unsubscribe("the-group-chat");
         },

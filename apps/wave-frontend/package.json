@@ -15,7 +15,6 @@
   "dependencies": {
     "@elysiajs/eden": "^0.7.4",
     "@tauri-apps/api": "^1.5.1",
-    "tauri-plugin-websocket-api": "https://github.com/tauri-apps/tauri-plugin-websocket#v1",
     "ui": "workspace:*",
     "wave-backend": "workspace:*"
   },
