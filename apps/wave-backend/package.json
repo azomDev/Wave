@@ -1,15 +1,15 @@
 {
-    "name": "wave-backend",
-    "version": "0.0.0",
-    "module": "src/index.ts",
-    "type": "module",
-    "scripts": {
-        "dev": "bun --watch src/index.ts"
-    },
-    "devDependencies": {
-        "bun-types": "latest"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    }
+  "name": "wave-backend",
+  "version": "0.0.0",
+  "main": "src/index.js",
+  "types": "src/index.js",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts"
+  },
+  "dependencies": {
+    "elysia": "latest"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
 }
