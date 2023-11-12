@@ -5,8 +5,8 @@
     import { edenTreaty } from "@elysiajs/eden";
     import type { App } from "wave-backend";
 
-    const api = edenTreaty<App>("http://0.0.0.0:8080");
-    const chat = api.client.subscribe();
+    const api = edenTreaty<App>("http://0.0.0.0:3000");
+    const chat = api.chat["12345678901234567890"].subscribe();
     chat.subscribe((message) => {
         console.log("Received:", message);
     });
