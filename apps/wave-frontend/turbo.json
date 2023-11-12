@@ -1,0 +1,9 @@
+{
+  "extends": ["//"],
+  "pipeline": {
+    "web": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
