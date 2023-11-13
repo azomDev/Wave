@@ -1,5 +1,6 @@
 <script lang="ts">
     import { MyCounterButton } from "ui";
+    import type { Conversation } from "ui";
     import api from "$lib/api";
 
     const chat = api.chat["12345678901234567890"].subscribe();
