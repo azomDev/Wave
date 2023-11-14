@@ -1,6 +1,5 @@
 {
   "build": {
-    "beforeDevCommand": "bun run web",
     "beforeBuildCommand": "bun run web:build",
     "devPath": "http://localhost:5173",
     "distDir": "../build"

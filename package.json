@@ -2,9 +2,11 @@
   "name": "wave",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "web": "turbo run web",
     "dev": "turbo run dev",
+    "web": "turbo run web",
+    "elysia": "turbo run elysia",
+    "tauri": "turbo run tauri",
+    "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write ."
   },
