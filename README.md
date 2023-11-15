@@ -67,6 +67,17 @@ If you see an issue that you want to help implementing:
 
 You can also contribute just by creating an issue or participating in discussions to help with ideas and decisions.
 
+## Initial configuration
+
+Because Bun isn't currently working on Windows, WSL is needed to run the project.  
+You can skip step 1 if you are on a Unix machine.
+
+1. Install Ubuntu with WSL2.
+2. Install [Bun](https://bun.sh) with the install script.
+3. Install a recent version of [Node.js](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-20-04#option-3-installing-node-using-the-node-version-manager).
+4. Install the [linux requirements of Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-linux).
+5. Run `bun install` followed by `bun dev` on the root folder.
+
 ## License
 
 Distributed under the GNU General Public License v3.0. See `LICENSE` for more information.
