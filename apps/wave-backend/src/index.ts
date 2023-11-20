@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import type { Conversation } from "ui";
 
-let temp: Conversation[] = [{ name: "Convo 1", id: 123456 }]; // This is to simulate a database with the conversations
+let temp: Conversation[] = [{ name: "Convo 1", id: 1 }]; // This is to simulate a database with the conversations
 
 const app = new Elysia()
     .get("/", () => "Hello Elysia")
