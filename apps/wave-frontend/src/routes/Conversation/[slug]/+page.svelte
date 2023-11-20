@@ -10,7 +10,6 @@
     // Function to handle sending a message
     function send() {
         if (newMessage.trim() !== "") {
-            chat.send({ username: "svelte", message: newMessage });
             sendMessage(newMessage);
             newMessage = "";
         }
