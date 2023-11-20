@@ -1,15 +1,14 @@
 <script lang="ts">
     import { _messages } from "$lib/api";
-    import { sendMessage } from "$lib/api";
+    import { send_message_server } from "$lib/api";
 
     export let data;
 
     let newMessage = "";
 
-    // Function to handle sending a message
-    function send() {
+    function send_message() {
         if (newMessage.trim() !== "") {
-            sendMessage(newMessage);
+            send_message_server(newMessage);
             newMessage = "";
         }
     }
@@ -21,7 +20,6 @@
     <a href="/">Main menu</a>
 
     <section>
-        <!-- Display messages -->
         <ul>
             {#each $_messages as { id, text }}
                 <li>{text}</li>
@@ -30,10 +28,7 @@
     </section>
 
     <section>
-        <!-- Input box for new message -->
         <input type="text" bind:value={newMessage} placeholder="Type your message..." />
-
-        <!-- Button to send message -->
-        <button on:click={send}>Send</button>
+        <button on:click={send_message}>Send</button>
     </section>
 </main>
