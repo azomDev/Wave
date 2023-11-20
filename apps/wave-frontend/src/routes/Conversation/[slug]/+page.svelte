@@ -4,12 +4,12 @@
 
     export let data;
 
-    let newMessage = "";
+    let new_message = "";
 
     function send_message() {
-        if (newMessage.trim() !== "") {
-            send_message_server(newMessage);
-            newMessage = "";
+        if (new_message.trim() !== "") {
+            send_message_server(new_message);
+            new_message = "";
         }
     }
 </script>
@@ -28,7 +28,7 @@
     </section>
 
     <section>
-        <input type="text" bind:value={newMessage} placeholder="Type your message..." />
+        <input type="text" bind:value={new_message} placeholder="Type your message..." />
         <button on:click={send_message}>Send</button>
     </section>
 </main>

@@ -1,7 +1,7 @@
 import { edenTreaty } from "@elysiajs/eden";
 import { writable } from "svelte/store";
 import type { Conversation, Message } from "ui";
-import { isConversation } from "ui/types/types";
+import { is_conversation } from "ui/types/types";
 import type { App } from "wave-backend";
 
 const api = edenTreaty<App>("http://localhost:3000");
@@ -14,22 +14,22 @@ export const _conversations = writable<Conversation[]>([]);
 
 chat.subscribe((message) => {
     // Will change later
-    if (isConversation(message.data)) {
-        addConversation(message.data);
+    if (is_conversation(message.data)) {
+        add_conversation(message.data);
     } else {
-        addMessage(message.data as string);
+        add_message(message.data as string);
     }
 });
 
-function addConversation(newConversation: Conversation) {
+function add_conversation(newConversation: Conversation) {
     _conversations.update((prevConversations) => [...prevConversations, newConversation]);
 }
 
-function addMessage(text: string) {
+function add_message(text: string) {
     _messages.update((prevMessages) => [...prevMessages, { id: new Date().getTime(), text }]);
 }
 
 export function send_message_server(text: string) {
     chat.send({ username: "svelte", message: text });
-    addMessage(text);
+    add_message(text);
 }
