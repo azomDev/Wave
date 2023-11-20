@@ -23,8 +23,7 @@
 <!-- App.svelte -->
 
 <script lang="ts">
-    import { writable } from "svelte/store";
-    import type { Conversation } from "ui";
+    import { _conversations } from "$lib/api";
 
     // const chat = api.chat["12345678901234567890"].subscribe();
     // chat.subscribe((message) => {
@@ -33,19 +32,6 @@
 
     // Create a writable store for messages
     // TODO remove this when the websockets updates the conversation store
-    const conversations = writable<Conversation[]>([]);
-    conversations.update((previous_conversations) => [
-        ...previous_conversations,
-        { name: "Convo 1", id: 123456 },
-    ]);
-    conversations.update((previous_conversations) => [
-        ...previous_conversations,
-        { name: "Convo 2", id: 234567 },
-    ]);
-    conversations.update((previous_conversations) => [
-        ...previous_conversations,
-        { name: "Convo 3", id: 345678 },
-    ]);
 
     // Function to add a new message
     // function addMessage(text: string) {
@@ -70,8 +56,8 @@
     <section>
         <!-- Display messages -->
         <ul>
-            {#each $conversations as { id, name }}
-                <li><a href="Conversation/{id}">{name}</a></li>
+            {#each $_conversations as conversation}
+                <li><a href="Conversation/{conversation.id}">{conversation.name}</a></li>
             {/each}
         </ul>
     </section>
