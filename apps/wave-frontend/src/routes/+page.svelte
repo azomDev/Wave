@@ -70,7 +70,7 @@
         <!-- Display messages -->
         <ul>
             {#each $conversations as { id, name }}
-                <li><a href="messaging_screen/{id}">{name}</a></li>
+                <li><a href="Conversation/{id}">{name}</a></li>
             {/each}
         </ul>
     </section>
