@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import type { Conversation } from "ui";
 
-let temp: Conversation[] = [{ name: "Convo 1", id: 123456 }];
+let temp: Conversation[] = [{ name: "Convo 1", id: 123456 }]; // This is to simulate a database with the conversations
 
 const app = new Elysia()
     .get("/", () => "Hello Elysia")
@@ -14,7 +14,7 @@ const app = new Elysia()
         open(ws) {
             const msg = `${ws.remoteAddress} has entered the chat`;
 
-            ws.send(temp[0]);
+            ws.send(temp[0]); // see comment on temp definition
 
             ws.subscribe("the-group-chat");
             ws.publish("the-group-chat", { message: msg });

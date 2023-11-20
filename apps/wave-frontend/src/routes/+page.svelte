@@ -32,6 +32,7 @@
     // });
 
     // Create a writable store for messages
+    // TODO remove this when the websockets updates the conversation store
     const conversations = writable<Conversation[]>([]);
     conversations.update((previous_conversations) => [
         ...previous_conversations,
