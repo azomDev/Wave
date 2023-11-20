@@ -24,62 +24,62 @@
 
 <script lang="ts">
     import { writable } from "svelte/store";
-    import { MyCounterButton } from "ui";
     import type { Conversation } from "ui";
-    import api from "$lib/api";
 
-    const chat = api.chat["12345678901234567890"].subscribe();
-    chat.subscribe((message) => {
-        addMessage(message.data as string);
-    });
-
-    // Define the message type
-    type Message = {
-        id: number;
-        text: string;
-    };
+    // const chat = api.chat["12345678901234567890"].subscribe();
+    // chat.subscribe((message) => {
+    //     addMessage(message.data as string);
+    // });
 
     // Create a writable store for messages
-    const messages = writable<Message[]>([]);
+    const conversations = writable<Conversation[]>([]);
+    conversations.update((previous_conversations) => [
+        ...previous_conversations,
+        { name: "Convo 1", id: 1 },
+    ]);
+    conversations.update((previous_conversations) => [
+        ...previous_conversations,
+        { name: "Convo 2", id: 2 },
+    ]);
+    conversations.update((previous_conversations) => [
+        ...previous_conversations,
+        { name: "Convo 3", id: 3 },
+    ]);
 
     // Function to add a new message
-    function addMessage(text: string) {
-        messages.update((prevMessages) => [...prevMessages, { id: new Date().getTime(), text }]);
-    }
+    // function addMessage(text: string) {
+    //     messages.update((prevMessages) => [...prevMessages, { id: new Date().getTime(), text }]);
+    // }
 
-    let newMessage = "";
+    // let newMessage = "";
 
     // Function to handle sending a message
-    function sendMessage() {
-        if (newMessage.trim() !== "") {
-            chat.send({ username: "svelte", message: newMessage });
-            addMessage(newMessage);
-            newMessage = ""; // Clear the input box after sending
-        }
-    }
+    // function sendMessage() {
+    //     if (newMessage.trim() !== "") {
+    //         chat.send({ username: "svelte", message: newMessage });
+    //         addMessage(newMessage);
+    //         newMessage = ""; // Clear the input box after sending
+    //     }
+    // }
 </script>
 
 <main>
-    <h1>Simple Messaging App</h1>
+    <h1>Main menu</h1>
 
     <section>
         <!-- Display messages -->
         <ul>
-            {#each $messages as { id, text }}
-                <li>{text}</li>
+            {#each $conversations as { id, name }}
+                <li><a href="messaging_screen/{id}">{name}</a></li>
             {/each}
         </ul>
     </section>
 
     <section>
         <!-- Input box for new message -->
-        <input type="text" bind:value={newMessage} placeholder="Type your message..." />
+        <!-- <input type="text" bind:value={newMessage} placeholder="Type your message..." /> -->
 
         <!-- Button to send message -->
-        <button on:click={sendMessage}>Send</button>
+        <!-- <button on:click={sendMessage}>Send</button> -->
     </section>
 </main>
-
-<style>
-    /* Add your styles here */
-</style>
