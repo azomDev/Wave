@@ -35,15 +35,15 @@
     const conversations = writable<Conversation[]>([]);
     conversations.update((previous_conversations) => [
         ...previous_conversations,
-        { name: "Convo 1", id: 1 },
+        { name: "Convo 1", id: 123456 },
     ]);
     conversations.update((previous_conversations) => [
         ...previous_conversations,
-        { name: "Convo 2", id: 2 },
+        { name: "Convo 2", id: 234567 },
     ]);
     conversations.update((previous_conversations) => [
         ...previous_conversations,
-        { name: "Convo 3", id: 3 },
+        { name: "Convo 3", id: 345678 },
     ]);
 
     // Function to add a new message

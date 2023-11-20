@@ -5,7 +5,7 @@
 
     export let data;
 
-    const chat = api.chat["12345678901234567890"].subscribe();
+    const chat = api.chat[data.slug].subscribe();
     chat.subscribe((message) => {
         addMessage(message.data as string);
     });
