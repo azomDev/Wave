@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
+    "web": "turbo run web",
+    "server": "turbo run server",
     "format": "prettier --write ."
   },
   "devDependencies": {

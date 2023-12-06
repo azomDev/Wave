@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { _conversations } from "$lib/api";
+    import { conversations } from "$lib/conversations";
 </script>
 
 <main>
@@ -7,8 +7,8 @@
 
     <section>
         <ul>
-            {#each $_conversations as conversation}
-                <li><a href="Conversation/{conversation.id}">{conversation.name}</a></li>
+            {#each $conversations as conversation}
+                <li><a href="/conversation/{conversation.id}">{conversation.name}</a></li>
             {/each}
         </ul>
     </section>
