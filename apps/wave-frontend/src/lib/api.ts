@@ -1,8 +1,8 @@
 import { edenTreaty } from "@elysiajs/eden";
 import { writable } from "svelte/store";
-import type { Conversation, Message } from "ui";
-import { is_conversation } from "ui/types/types";
 import type { App } from "wave-backend";
+import type { Conversation, Message } from "wave-types";
+import { is_conversation } from "wave-types";
 
 const api = edenTreaty<App>("http://localhost:3000");
 
