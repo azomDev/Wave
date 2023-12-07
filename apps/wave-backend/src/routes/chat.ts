@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 
-export const chatRoutes = () =>
-    new Elysia().group("/chat", (app) =>
+export const chatRoutes = (app: Elysia) =>
+    app.group("/chat", (app) =>
         app.ws("/:chatId", {
             params: t.Object({ chatId: t.String({ minLength: 6, maxLength: 6 }) }),
             body: t.Object({
