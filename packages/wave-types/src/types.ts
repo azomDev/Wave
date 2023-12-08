@@ -10,10 +10,11 @@ export interface Message {
     sender: string;
 
     time_sent: number;
+    sent: boolean;
     modified: boolean;
 
     type: MessageType;
-    data: string;
+    message: string;
 }
 
 export const is_conversation = (data: any): data is Conversation => {

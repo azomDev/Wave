@@ -22,8 +22,8 @@
 
     <section>
         <ul>
-            {#each $messages as { id, data }}
-                <li>{data}</li>
+            {#each $messages as { id, message }}
+                <li>{message}</li>
             {/each}
         </ul>
     </section>
