@@ -5,24 +5,20 @@ export const chatRoutes = (app: Elysia) =>
         app.ws("/:chatId", {
             params: t.Object({ chatId: t.String({ minLength: 6, maxLength: 6 }) }),
             body: t.Object({
-                id: t.Number(),
-                sender: t.String(),
-
-                time_sent: t.Number(),
-                modified: t.Boolean(),
+                modified: t.Boolean({ default: false }),
 
                 type: t.Enum({ text: "text" }),
-                data: t.Any(),
+                message: t.Any(),
             }),
             response: t.Object({
                 id: t.Number(),
                 sender: t.String(),
 
+                modified: t.Boolean({ default: false }),
                 time_sent: t.Number(),
-                modified: t.Boolean(),
 
                 type: t.Enum({ text: "text" }),
-                data: t.Any(),
+                message: t.Any(),
             }),
             open(ws) {
                 const msg = `${ws.remoteAddress} has entered the chat`;
@@ -31,17 +27,20 @@ export const chatRoutes = (app: Elysia) =>
                 ws.subscribe(ws.data.params.chatId);
             },
             message(ws, message) {
-                console.log(
-                    "Received",
-                    message.data,
-                    "from",
-                    message.sender,
-                    "in convo",
-                    ws.data.params.chatId
-                );
-                ws.send(message);
+                ws.send({
+                    ...message,
+                    id: 0,
+                    sender: ws.remoteAddress,
+                    time_sent: Date.now(),
+                });
+
                 // the server re-broadcasts incoming messages to everyone
-                ws.publish(ws.data.params.chatId, message);
+                ws.publish(ws.data.params.chatId, {
+                    ...message,
+                    id: 0,
+                    sender: ws.remoteAddress,
+                    time_sent: Date.now(),
+                });
             },
             close(ws) {
                 const msg = `${ws.remoteAddress} has left the chat`;
