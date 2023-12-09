@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "elysia": "latest",
+    "drizzle-orm": "^0.29.1",
     "wave-types": "workspace:*"
   },
   "devDependencies": {
