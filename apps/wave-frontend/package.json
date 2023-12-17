@@ -13,6 +13,7 @@
   "devDependencies": {
     "@sveltejs/adapter-static": "^2.0.3",
     "@sveltejs/kit": "^1.20.4",
+    "@types/bcryptjs": "^2.4.6",
     "svelte": "^4.0.5",
     "svelte-check": "^3.4.3",
     "tslib": "^2.4.1",
@@ -22,6 +23,9 @@
   "dependencies": {
     "@elysiajs/eden": "^0.7.4",
     "@tauri-apps/api": "^1.5.1",
+    "bcryptjs": "^2.4.3",
+    "crystals-kyber-js": "^1.1.0",
+    "drizzle-orm": "^0.29.1",
     "ui": "workspace:*",
     "wave-backend": "workspace:*",
     "wave-types": "workspace:*"
