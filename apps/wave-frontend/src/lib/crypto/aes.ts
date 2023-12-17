@@ -1,68 +1,59 @@
+import type { MaybePromise } from "@sveltejs/kit";
 import type { EncryptedData, EncryptionHandler } from "./crypto";
 
-function bufferToString(buffer: ArrayLike<number> | ArrayBufferLike): string {
-    return btoa(String.fromCharCode(...new Uint8Array(buffer)));
-}
-
-function stringToBuffer(str: string): ArrayBuffer {
-    return Uint8Array.from(atob(str), (c) => c.charCodeAt(0)).buffer as ArrayBuffer;
-}
-
 interface EncryptedDataAES extends EncryptedData {
-    data: string;
-    iv: string;
+    data: Uint8Array;
+    iv: Uint8Array;
 }
 
 export class EncryptionAES implements EncryptionHandler<EncryptedDataAES> {
     #masterKey: Promise<CryptoKey>;
 
-    constructor(seed: string) {
-        this.#masterKey = new Promise(async (res) => {
-            const passkey = window.crypto.subtle.importKey(
-                "raw",
-                new TextEncoder().encode(seed),
-                "PBKDF2",
-                false,
-                ["deriveBits", "deriveKey"]
-            );
-
-            const masterKey = window.crypto.subtle.deriveKey(
+    constructor(key: MaybePromise<CryptoKey> | null) {
+        if (key) {
+            this.#masterKey = Promise.resolve(key);
+        } else {
+            this.#masterKey = window.crypto.subtle.generateKey(
                 {
-                    name: "PBKDF2",
-                    // TODO: add salt (from account id?)
-                    // salt: window.crypto.getRandomValues(new Uint8Array(16)),
-                    salt: new Uint8Array(16),
-                    iterations: 110000,
-                    hash: "SHA-256",
+                    name: "AES-GCM",
+                    length: 256,
                 },
-                await passkey,
-                { name: "AES-GCM", length: 256 },
                 true,
                 ["encrypt", "decrypt"]
             );
-
-            res(masterKey);
-        });
+        }
     }
 
-    async encrypt(password: string) {
+    async encrypt(data: Uint8Array) {
         const iv = window.crypto.getRandomValues(new Uint8Array(12));
         const buffer = await window.crypto.subtle.encrypt(
             { name: "AES-GCM", iv },
             await this.#masterKey,
-            new TextEncoder().encode(password)
+            data
         );
 
-        return { data: bufferToString(buffer), iv: bufferToString(iv) };
+        return { data: new Uint8Array(buffer), iv };
     }
 
     async decrypt(encryptedData: EncryptedDataAES) {
         const decryptedBuffer = await window.crypto.subtle.decrypt(
-            { name: "AES-GCM", iv: stringToBuffer(encryptedData.iv) },
+            { name: "AES-GCM", iv: encryptedData.iv },
             await this.#masterKey,
-            stringToBuffer(encryptedData.data)
+            encryptedData.data
         );
 
-        return new TextDecoder().decode(decryptedBuffer);
+        return new Uint8Array(decryptedBuffer);
+    }
+
+    async encryptString(data: string) {
+        return this.encrypt(new TextEncoder().encode(data));
+    }
+
+    async decryptString(encryptedData: EncryptedDataAES) {
+        return new TextDecoder().decode(await this.decrypt(encryptedData));
+    }
+
+    async _getPrivateKey() {
+        return await this.#masterKey;
     }
 }

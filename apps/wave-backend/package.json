@@ -9,11 +9,13 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^0.7.2",
+    "bcryptjs": "^2.4.3",
     "elysia": "latest",
     "drizzle-orm": "^0.29.1",
     "wave-types": "workspace:*"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "bun-types": "latest"
   }
 }
