@@ -8,6 +8,7 @@
     "server": "bun dev"
   },
   "dependencies": {
+    "@elysiajs/cors": "^0.7.2",
     "elysia": "latest",
     "drizzle-orm": "^0.29.1",
     "wave-types": "workspace:*"
