@@ -4,8 +4,7 @@
   "main": "src/index.js",
   "types": "src/index.js",
   "scripts": {
-    "dev": "bun --watch run src/index.ts",
-    "server": "bun dev"
+    "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
     "elysia": "latest",
