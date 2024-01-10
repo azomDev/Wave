@@ -1,0 +1,9 @@
+{
+  "extends": ["//"],
+  "pipeline": {
+    "elysia": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
