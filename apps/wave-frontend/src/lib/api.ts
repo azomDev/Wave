@@ -13,7 +13,6 @@ export const _messages = writable<Message[]>([]);
 export const _conversations = writable<Conversation[]>([]);
 
 chat.subscribe((message) => {
-    // Will change later
     if (isConversation(message.data)) {
         addConversation(message.data);
     } else {
@@ -29,7 +28,7 @@ function addMessage(text: string) {
     _messages.update((prevMessages) => [...prevMessages, { id: new Date().getTime(), text }]);
 }
 
-export function send_message_server(text: string) {
+export function sendMessage(text: string) {
     chat.send({ username: "svelte", message: text });
     addMessage(text);
 }
