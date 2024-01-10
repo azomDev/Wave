@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 const app = new Elysia()
     .get("/", () => "Hello Elysia")
     .ws("/chat/:chatId", {
-        params: t.Object({ chatId: t.String({ minLength: 6, maxLength: 6 }) }),
+        params: t.Object({ chatId: t.String({ minLength: 20, maxLength: 20 }) }),
         body: t.Object({
             username: t.String(),
             message: t.String(),
@@ -14,14 +14,7 @@ const app = new Elysia()
             ws.publish("the-group-chat", { message: msg });
         },
         message(ws, message) {
-            console.log(
-                "Received",
-                message.message,
-                "from",
-                message.username,
-                "in convo",
-                ws.data.params.chatId
-            );
+            console.log("Received", message.message, "from", message.username);
             ws.send("The message has been sent to the group.");
             // the server re-broadcasts incoming messages to everyone
             ws.publish("the-group-chat", message);
