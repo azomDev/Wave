@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { chat } from "$lib/api";
     import { _messages } from "$lib/api";
     import { sendMessage } from "$lib/api";
 
