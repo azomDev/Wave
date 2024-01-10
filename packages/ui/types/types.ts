@@ -1,12 +1,11 @@
 export type Conversation = {
     name: string;
-    id: number;
+    id: string;
 };
 
 export type Message = {
-    // sender: string;
-    // sent_time_stamp: string;
-    id: number;
-    text: string;
+    content: string;
+    sender: string;
+    sent_time_stamp: string;
+    id: string;
 };
-
