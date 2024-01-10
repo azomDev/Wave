@@ -1,18 +1,19 @@
 <script lang="ts">
     import Greet from "./lib/Greet.svelte";
     import { MyCounterButton } from "ui";
+    import WebSocket from "tauri-plugin-websocket-api";
 
-    import { edenTreaty } from "@elysiajs/eden";
-    import type { App } from "wave-backend";
-
-    const api = edenTreaty<App>("http://0.0.0.0:8080");
-    const chat = api.client.subscribe();
-    chat.subscribe((message) => {
-        console.log("Received:", message);
-    });
+    const backendws = WebSocket.connect("ws://localhost:3000");
+    backendws.then((ws) =>
+        ws.addListener((message) => {
+            console.log("🚀 ~ message:", message.data);
+        })
+    );
 
     async function Click() {
-        chat.send({ username: "tauri", message: "Hello World" });
+        const ws = await backendws;
+        console.log("🚀 ~ file: App.svelte:15 ~ Click ~ ws:", ws);
+        await ws.send("Hello World");
     }
 </script>
 

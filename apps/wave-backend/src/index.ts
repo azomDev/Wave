@@ -1,31 +1,31 @@
-import { Elysia, t } from "elysia";
+const server = Bun.serve<{ username: string }>({
+    fetch(req, server) {
+        const cookies = req.headers.get("cookie");
+        // const username = getUsernameFromCookies(cookies);
+        const username = "test!";
+        const success = server.upgrade(req, { data: { username } });
+        if (success) return undefined;
 
-const app = new Elysia()
-    .get("/", () => "Hello Elysia")
-    .ws("/client", {
-        body: t.Object({
-            username: t.String(),
-            message: t.String(),
-        }),
+        return new Response("Hello world");
+    },
+    websocket: {
         open(ws) {
-            const msg = `${ws.data.body.username} has entered the chat`;
+            const msg = `${ws.data.username} has entered the chat`;
             ws.subscribe("the-group-chat");
-            ws.publish("the-group-chat", { message: msg });
+            ws.publish("the-group-chat", msg);
         },
         message(ws, message) {
-            console.log("Received", message.username, "from", message.username);
+            console.log("Received", message, "from", ws.data.username);
             ws.send("The message has been sent to the group.");
             // the server re-broadcasts incoming messages to everyone
-            ws.publish("the-group-chat", message);
+            ws.publish("the-group-chat", `${ws.data.username}: ${message}`);
         },
         close(ws) {
-            const msg = `${ws.data.body.username} has left the chat`;
-            ws.publish("the-group-chat", { message: msg });
+            const msg = `${ws.data.username} has left the chat`;
+            server.publish("the-group-chat", msg);
             ws.unsubscribe("the-group-chat");
         },
-    })
-    .listen(3000);
+    },
+});
 
-console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
-
-export type App = typeof app;
+console.log(`Listening on ${server.hostname}:${server.port}`);
