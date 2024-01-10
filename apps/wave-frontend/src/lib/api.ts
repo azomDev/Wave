@@ -1,6 +1,6 @@
 import { edenTreaty } from "@elysiajs/eden";
 import { writable } from "svelte/store";
-import type { Conversation, Message } from "ui";
+import type { Message } from "ui";
 import type { App } from "wave-backend";
 
 const api = edenTreaty<App>("http://localhost:3000");
@@ -8,8 +8,6 @@ const api = edenTreaty<App>("http://localhost:3000");
 export const chat = api.chat["123456"].subscribe();
 
 export const _messages = writable<Message[]>([]);
-
-export const _conversations = writable<Conversation[]>([]);
 
 chat.subscribe((message) => {
     addMessage(message.data as string);
@@ -21,6 +19,5 @@ function addMessage(text: string) {
 }
 
 export function sendMessage(text: string) {
-    chat.send({ username: "svelte", message: text });
     addMessage(text);
 }
