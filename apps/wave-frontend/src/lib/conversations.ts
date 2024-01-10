@@ -1,7 +1,6 @@
 import { api } from "$lib/api";
 import { readable, readonly, writable } from "svelte/store";
 import type { Conversation, Message } from "wave-types";
-import { EncryptionAES } from "./crypto/aes";
 
 export const conversations = readable<Conversation[]>([{ id: 123456, name: "Test" }]);
 
@@ -12,12 +11,12 @@ export function connectConversation(id: number) {
 
     const messages = writable<Message[]>([]);
 
-    const encryption = new EncryptionAES("password");
+    // const encryption = new EncryptionAES("password");
 
     chat.subscribe(async ({ data }) => {
-        const message = await encryption.decrypt(data.message);
+        // const message = await encryption.decrypt(data.message);
         messages.update((prev) => {
-            prev.push({ ...data, sent: true, message });
+            prev.push({ ...data, sent: true });
             return prev;
         });
     });
@@ -25,7 +24,8 @@ export function connectConversation(id: number) {
     async function sendMessage(message: string) {
         chat.send({
             type: "text",
-            message: await encryption.encrypt(message),
+            // message: await encryption.encrypt(message),
+            message,
             modified: false,
         });
     }
