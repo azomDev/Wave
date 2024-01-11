@@ -6,7 +6,7 @@ export interface Conversation {
 export type MessageType = "text";
 
 export interface Message {
-    id: number;
+    id: number | null;
     sender: string;
 
     time_sent: number;
