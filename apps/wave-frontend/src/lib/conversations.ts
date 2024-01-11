@@ -2,7 +2,7 @@ import { api } from "$lib/api";
 import { readable, readonly, writable } from "svelte/store";
 import type { Conversation, Message } from "wave-types";
 
-export const conversations = readable<Conversation[]>([{ id: 123456, name: "Test" }]);
+export const conversations = readable<Conversation[]>([{ id: 123456, name: "Test" }, { id: 111111, name: "Test 2" }]);
 
 export function connectConversation(id: number) {
     let conversation: Conversation | undefined;
