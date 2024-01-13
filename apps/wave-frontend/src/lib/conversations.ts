@@ -15,18 +15,18 @@ export function connectConversation(id: number) {
 
     chat.subscribe(async ({ data }) => {
         // const message = await encryption.decrypt(data.message);
+        console.log(data);
         messages.update((prev) => {
             for (const message of prev) { // yes, this is cursed
                 if (message.time_sent == data.time_sent) {
                     message.sent = true;
-                    message.id = data.id;
                     continue;
                 }
             }
             // prev.push({ ...data, sent: true });
             return prev;
         });
-    });
+    }); 
 
     async function sendMessage(message: Message) {
         messages.update((prev) => {

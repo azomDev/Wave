@@ -17,8 +17,7 @@
                 time_sent: Date.now(), 
                 sent: false, 
                 modified: false, 
-                type: "text", 
-                id: null
+                id: crypto.randomUUID(),
             }
             send(messageToBeSent);
             message = "";

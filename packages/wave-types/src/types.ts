@@ -3,17 +3,16 @@ export interface Conversation {
     id: number;
 }
 
-export type MessageType = "text";
+export type MessageType = "text";     
 
-export interface Message {
-    id: number | null;
+export type Message = {
+    id: string;
     sender: string;
 
     time_sent: number;
     sent: boolean;
     modified: boolean;
 
-    type: MessageType;
     message: string;
 }
 
