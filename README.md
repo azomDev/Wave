@@ -1,4 +1,5 @@
 # Wave - All-in-One Messaging App
+## Important: this project is on hold for some time until we can get a better idea of how to approach this.
 
 Wave is an open source, comprehensive messaging solution aiming to revolutionize the way we communicate. By centralizing SMS, MMS, server messaging, email, and other messaging types into one application, Wave intends to provide an integrated and seamless communication experience.
 
