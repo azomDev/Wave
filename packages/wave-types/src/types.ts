@@ -17,10 +17,24 @@ export interface Message {
     message: string;
 }
 
-export const is_conversation = (data: any): data is Conversation => {
-    return typeof data === "object" && typeof data.name === "string" && typeof data.id === "number";
+export const isConversation = (data: unknown): data is Conversation => {
+    return (
+        !!data &&
+        typeof data === "object" &&
+        "name" in data &&
+        typeof data.name === "string" &&
+        "id" in data &&
+        typeof data.id === "number"
+    );
 };
 
-export const is_message = (data: any): data is Message => {
-    return typeof data === "object" && typeof data.id === "number" && typeof data.text === "string";
+export const isMessage = (data: unknown): data is Message => {
+    return (
+        !!data &&
+        typeof data === "object" &&
+        "id" in data &&
+        typeof data.id === "number" &&
+        "text" in data &&
+        typeof data.text === "string"
+    );
 };

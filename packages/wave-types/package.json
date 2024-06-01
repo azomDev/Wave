@@ -1,11 +1,7 @@
 {
   "name": "wave-types",
-  "module": "index.ts",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+  "module": "index.ts"
 }

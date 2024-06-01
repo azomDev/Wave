@@ -1,0 +1,35 @@
+{
+  "name": "wave-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "web:dev": "vinxi dev",
+    "web:build": "vinxi build",
+    "web:start": "vinxi start"
+  },
+  "devDependencies": {
+    "wave-backend": "workspace:*",
+    "elysia": "1.0.22"
+  },
+  "dependencies": {
+    "@elysiajs/eden": "1.0.14",
+    "@kobalte/core": "^0.13.2",
+    "@solidjs/router": "^0.13.4",
+    "@solidjs/start": "^1.0.1",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tauri-apps/api": ">=2.0.0-beta.0",
+    "@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
+    "autoprefixer": "^10.4.19",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "crystals-kyber-js": "1.1.1",
+    "postcss": "^8.4.38",
+    "solid-js": "^1.8.17",
+    "tailwindcss": "^3.4.3",
+    "tailwind-merge": "^2.3.0",
+    "vinxi": "^0.3.11"
+  }
+}

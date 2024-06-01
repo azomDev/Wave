@@ -2,25 +2,21 @@
   "name": "wave",
   "private": true,
   "scripts": {
-    "dev": "turbo run dev",
-    "web": "turbo run web",
-    "server": "turbo run server",
-    "format": "prettier --write ."
+    "dev": "turbo run server web:dev",
+    "tauri-dev": "turbo run dev"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.6",
-    "@tauri-apps/cli": "^1.5.6",
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.3",
-    "prettier-plugin-organize-imports": "^3.2.3",
-    "prettier-plugin-svelte": "^3.0.3",
-    "prettier-plugin-tailwindcss": "^0.5.7",
-    "tailwindcss": "^3.3.5",
+    "@biomejs/biome": "latest",
+    "@tauri-apps/cli": ">=2.0.0-beta.0",
+    "bun-types": "latest",
     "turbo": "latest"
   },
-  "packageManager": "bun@1.0.7",
+  "packageManager": "bun@1.1.8",
   "workspaces": [
     "apps/*",
     "packages/*"
+  ],
+  "trustedDependencies": [
+    "@biomejs/biome"
   ]
 }

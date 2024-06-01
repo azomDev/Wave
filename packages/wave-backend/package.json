@@ -1,0 +1,19 @@
+{
+  "name": "wave-backend",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "types": "src/index.js",
+  "scripts": {
+    "dev": "bun --watch run src/index.ts",
+    "server": "bun dev"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.0.2",
+    "elysia": "latest",
+    "drizzle-orm": "^0.29.1"
+  },
+  "devDependencies": {
+    "wave-types": "workspace:*"
+  }
+}

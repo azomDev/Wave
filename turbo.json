@@ -4,7 +4,7 @@
         "dev": {
             "cache": false
         },
-        "web": {
+        "web:dev": {
             "cache": false
         },
         "server": {
