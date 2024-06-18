@@ -1,16 +1,10 @@
 # Wave - All-in-One Messaging App
+
 ## Important: this project is on hold for some time until we can get a better idea of how to approach this.
 
 Wave is an open source, comprehensive messaging solution aiming to revolutionize the way we communicate. By centralizing SMS, MMS, server messaging, email, and other messaging types into one application, Wave intends to provide an integrated and seamless communication experience.
 
-## Technologies
-
--   Tauri for creating cross-platform desktop (and soon mobile) applications
--   Sveltekit for creating the user interface
--   Typescript for frontend and server development
--   Bun for building and optimizing frontend and server code
--   Vite for efficient development and building
--   postgreSQL for local and server-side database storage
+On top of that, Wave aims to be very secure.
 
 ## Features
 
@@ -20,6 +14,7 @@ Wave aims to support a broad range of messaging types including:
 
 -   SMS/MMS
 -   Server Messaging
+-   External messaging integration
 -   Email
 -   Phone calls
 -   Voice and video calls
@@ -34,7 +29,7 @@ Wave will support cross-platform synchronization. This allows users to seamlessl
 
 ## Customization
 
-One of the key aspects of Wave is its high level of customization. Wave plans to offer a wide range of options for modifying the user interface and the functionality of the app to suit individual needs and preferences.
+One of the key aspects of Wave is its high level of customization. Wave plans to offer a wide range of options for modifying the user interface and the functionality of the app to suit individual needs and preferences. For example, the UI will be entirely constumizable, to the point of being able to using a built-in api to do things like send messages, show messages and much more.
 
 ## Multilingual Support and Chat Translation
 
