@@ -45,8 +45,6 @@ Please bear in mind that Wave is still in the early stages of development. The f
 
 Stay tuned to this space for updates on our progress and ways you can get involved. If you're excited about Wave and want to contribute, feel free to reach out or start contributing on our issues page.
 
-* 6th of November 2023: Restarting from scratch
-
 ## Getting Involved
 
 As an open source project, Wave welcomes contributions from the community. Whether you're a seasoned developer or a user with great ideas, there is a place for you here. We believe that collective intelligence is key to creating an app that is robust, user-friendly, and innovative. Any help is always appreciated, even a small suggestion or idea.
