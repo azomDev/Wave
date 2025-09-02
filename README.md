@@ -1,6 +1,6 @@
 # Wave - All-in-One Messaging App
 
-> [!IMPORTANT]
+> [!CAUTION]
 > I am no longer trying to continue this since I want to focus my effort on other things for now. I do however plan on getting back on it, but this will have to wait many years...
 
 
